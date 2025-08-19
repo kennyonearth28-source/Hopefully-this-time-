@@ -10,4 +10,5 @@ from Ethos Northeast Philadelphia.
 
 ## Usage
 
-After deploy, you can hit:
+After deploy, you can hit: https://.vercel.app/api/inventory
+to get the latest live inventory.
