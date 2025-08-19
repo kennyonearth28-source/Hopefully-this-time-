@@ -6,7 +6,6 @@ export default async function handler(req, res) {
       'https://nephilly.ethoscannabis.com/stores/ethos-northeast-philadelphia/products/flower'
     );
 
-    // Try to parse JSON, fallback to text
     let data;
     try {
       data = await response.json();
@@ -14,8 +13,32 @@ export default async function handler(req, res) {
       data = await response.text();
     }
 
-    res.status(200).json({ inventory: data });
+    // If the API returns structured JSON
+    if (Array.isArray(data)) {
+      // Remove prices, keep only clean details
+      const cleaned = data.map(item => ({
+        name: item.name || null,
+        brand: item.brand || null,
+        type: item.type || null,
+        category: item.category || 'Flower',
+        thc: item.thc || null,
+        cbd: item.cbd || null,
+        description: item.description || null
+      }));
+
+      return res.status(200).json({ inventory: cleaned });
+    }
+
+    // If it’s HTML or unknown format
+    return res.status(200).json({
+      message: "Fetched data (non-JSON). Manual parsing may be needed.",
+      raw: data
+    });
+
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch data', details: error.message });
+    res.status(500).json({
+      error: 'Failed to fetch data',
+      details: error.message
+    });
   }
 }
